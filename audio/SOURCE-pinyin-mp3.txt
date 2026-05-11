@@ -1,0 +1,7 @@
+Pinyin tile audio files are copied from the female MP3 set in:
+https://github.com/shikangkai/Chinese-Pinyin-Audio
+
+The repository readme says the female files are derived from:
+https://github.com/pffy/mp3-chinese-pinyin-sound
+
+Used for all initial and final tile sounds to keep one consistent voice/source.

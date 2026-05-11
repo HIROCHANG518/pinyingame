@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>轩瑞的拼音魔法工坊</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" id="gameScreen">
+      <header class="hero">
+        <h1>轩瑞的拼音魔法工坊</h1>
+        <button class="end-btn" id="finishBtn">结束练习</button>
+      </header>
+
+      <section class="status-grid">
+        <article class="stat"><span>题目</span><strong id="progressText">0/20</strong></article>
+        <article class="stat design-stat"><span>设计</span><button id="toggleDesignerBtn">我来设计</button></article>
+        <article class="stat review-stat"><span>再次练习</span><button id="reviewBtn">0 题</button></article>
+        <article class="stat group-control">
+          <label for="groupSlider">题目组</label>
+          <strong id="groupText">组 1</strong>
+          <input id="groupSlider" type="range" min="1" max="50" value="1" />
+          <button id="startGroupBtn">开始本组</button>
+        </article>
+        <article class="stat"><span>连续答对</span><strong id="streakText">0</strong></article>
+        <article class="stat"><span>星星</span><strong id="starsText">0</strong></article>
+        <article class="stat"><span>正确率</span><strong id="accuracyText">100%</strong></article>
+      </section>
+
+      <section class="play-grid">
+        <aside class="panel initials">
+          <div class="panel-head"><h2>声母区</h2><span>选一个</span></div>
+          <div class="tile-grid" id="initialGrid"></div>
+        </aside>
+
+        <section class="stage-card">
+          <div class="task-bar">
+            <strong id="taskType">两拼：声母 + 韵母</strong>
+            <button id="answerBtn">看答案</button>
+            <button id="replayBtn">再听一次</button>
+          </div>
+          <div class="design-workspace" id="designWorkspace" hidden>
+            <div class="design-column">
+              <strong>备选字</strong>
+              <div class="candidate-zone inline-candidates" id="candidateZone"></div>
+            </div>
+            <div class="design-column">
+              <strong>选中字</strong>
+              <div class="custom-list inline-selected" id="customList"></div>
+            </div>
+          </div>
+          <div class="stage" id="stage">
+            <div class="heard-char" id="heardChar"></div>
+            <div class="merge">
+              <span class="piece initial-piece" id="chosenInitial">?</span>
+              <span class="plus">+</span>
+              <span class="piece final-piece" id="chosenFinal">?</span>
+            </div>
+            <div class="pinyin-result" id="pinyinResult">?</div>
+          </div>
+          <div class="tone-box">
+            <div class="tone-labels"><span>轻声</span><span>一声</span><span>二声</span><span>三声</span><span>四声</span></div>
+            <input id="toneSlider" type="range" min="0" max="4" value="1" />
+            <strong id="tonePreview">一声</strong>
+          </div>
+          <div class="steps"><span>1 选声母</span><span>2 选韵母</span><span>3 选声调</span></div>
+          <div class="feedback" id="feedback">先听汉字，再把它拼出来。</div>
+          <div class="answer" id="answerBox" hidden></div>
+        </section>
+
+        <aside class="panel finals">
+          <div class="panel-head"><h2>韵母区</h2></div>
+          <div id="finalGroups"></div>
+        </aside>
+      </section>
+
+      <section class="summary" id="summaryPanel" hidden>
+        <h2>轩瑞同学，你又进步啦！明天等你哦！</h2>
+        <p id="summaryText"></p>
+        <div id="wrongList"></div>
+      </section>
+    </main>
+    <script src="./audio-manifest.js"></script>
+    <script src="./common-chars.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
