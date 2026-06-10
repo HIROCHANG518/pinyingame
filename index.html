@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>轩瑞的拼音魔法工坊</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="app" id="gameScreen">
@@ -18,10 +21,12 @@
         <article class="stat design-stat"><span>设计</span><button id="toggleDesignerBtn">我来设计</button></article>
         <article class="stat review-stat"><span>再次练习</span><button id="reviewBtn">0 题</button></article>
         <article class="stat group-control">
-          <label for="groupSlider">题目组</label>
+          <strong id="questionIndexText" class="question-idx">第 0/20 题</strong>
+          <label for="groupSlider">组</label>
           <strong id="groupText">组 1</strong>
           <input id="groupSlider" type="range" min="1" max="50" value="1" />
           <button id="startGroupBtn">开始本组</button>
+          <button id="nextGroupBtn">下一组 →</button>
         </article>
         <article class="stat"><span>连续答对</span><strong id="streakText">0</strong></article>
         <article class="stat"><span>星星</span><strong id="starsText">0</strong></article>
@@ -53,16 +58,26 @@
           <div class="stage" id="stage">
             <div class="heard-char" id="heardChar"></div>
             <div class="merge">
-              <span class="piece initial-piece" id="chosenInitial">?</span>
-              <span class="plus">+</span>
-              <span class="piece final-piece" id="chosenFinal">?</span>
+              <div class="piece-wrapper">
+                <span class="piece-check" id="initCheck"></span>
+                <span class="piece initial-piece" id="chosenInitial">?</span>
+              </div>
+              <div class="piece-wrapper">
+                <span class="piece-check" id="finalCheck"></span>
+                <span class="piece final-piece" id="chosenFinal">?</span>
+              </div>
             </div>
             <div class="pinyin-result" id="pinyinResult">?</div>
           </div>
           <div class="tone-box">
             <div class="tone-labels"><span>轻声</span><span>一声</span><span>二声</span><span>三声</span><span>四声</span></div>
-            <input id="toneSlider" type="range" min="0" max="4" value="1" />
-            <strong id="tonePreview">一声</strong>
+            <div class="tone-btns" id="toneBtns">
+              <button class="tone-btn" data-tone="0" title="轻声"></button>
+              <button class="tone-btn active" data-tone="1" title="一声">ˉ</button>
+              <button class="tone-btn" data-tone="2" title="二声">ˊ</button>
+              <button class="tone-btn" data-tone="3" title="三声">ˇ</button>
+              <button class="tone-btn" data-tone="4" title="四声">ˋ</button>
+            </div>
           </div>
           <div class="steps"><span>1 选声母</span><span>2 选韵母</span><span>3 选声调</span></div>
           <div class="feedback" id="feedback">先听汉字，再把它拼出来。</div>

@@ -53,10 +53,11 @@ const els = {
   initialGrid: $("initialGrid"), finalGroups: $("finalGroups"), progress: $("progressText"),
   groupSlider: $("groupSlider"), groupText: $("groupText"), accuracy: $("accuracyText"),
   streak: $("streakText"), stars: $("starsText"), chosenInitial: $("chosenInitial"),
-  chosenFinal: $("chosenFinal"), pinyin: $("pinyinResult"), toneSlider: $("toneSlider"),
-  tonePreview: $("tonePreview"), feedback: $("feedback"), stage: $("stage"),
+  chosenFinal: $("chosenFinal"), pinyin: $("pinyinResult"), toneBtns: $("toneBtns"),
+  feedback: $("feedback"), stage: $("stage"),
   taskType: $("taskType"), answerBox: $("answerBox"), heardChar: $("heardChar"),
-  designWorkspace: $("designWorkspace"), candidateZone: $("candidateZone"), customList: $("customList")
+  designWorkspace: $("designWorkspace"), candidateZone: $("candidateZone"), customList: $("customList"),
+  questionIndexText: $("questionIndexText"), nextGroupBtn: $("nextGroupBtn")
 };
 
 function markedPinyin(initial, final, tone) {
@@ -189,7 +190,6 @@ function resetSelection() {
   state.selectedInitial = "";
   state.selectedFinal = "";
   state.selectedTone = 1;
-  els.toneSlider.value = "1";
   els.chosenInitial.textContent = "?";
   els.chosenFinal.textContent = "?";
   els.pinyin.textContent = "?";
@@ -198,7 +198,10 @@ function resetSelection() {
   els.stage.className = "stage";
   els.feedback.className = "feedback";
   els.feedback.textContent = "先听汉字，再把它拼出来。";
-  document.querySelectorAll(".tile").forEach((b) => b.classList.remove("selected"));
+  document.querySelectorAll(".tile").forEach((b) => { b.classList.remove("selected", "correct-reveal"); });
+  $("initCheck").textContent = "";
+  $("finalCheck").textContent = "";
+  setToneButton(1);
   updateTone();
   updateModeView();
 }
@@ -207,6 +210,7 @@ function updateStats() {
   const done = state.index;
   els.progress.textContent = `${done}/${state.targetCount}`;
   els.groupText.textContent = state.reviewMode ? "再次练习" : `组 ${state.group}`;
+  els.questionIndexText.textContent = `第 ${done}/${state.targetCount} 题`;
   els.accuracy.textContent = `${done ? Math.round(state.correct / done * 100) : 100}%`;
   els.streak.textContent = state.streak;
   els.stars.textContent = state.stars;
@@ -243,8 +247,19 @@ function renderTiles() {
     const btn = e.target.closest("[data-initial]");
     if (!btn) return;
     state.selectedInitial = btn.dataset.initial;
-    document.querySelectorAll("[data-initial]").forEach((b) => b.classList.toggle("selected", b === btn));
+    document.querySelectorAll("[data-initial]").forEach((b) => {
+      b.classList.remove("correct-reveal");
+      b.classList.toggle("selected", b === btn);
+    });
     els.chosenInitial.textContent = state.selectedInitial;
+    // 立即判断声母是否正确，显示对勾
+    const q = currentQuestion();
+    if (state.selectedInitial === q.initial) {
+      document.querySelector(`[data-initial="${q.initial}"]`)?.classList.add("correct-reveal");
+      $("initCheck").textContent = "✅";
+    } else {
+      $("initCheck").textContent = "";
+    }
     playInitial(state.selectedInitial);
     if (state.designMode) {
       updateTone();
@@ -257,8 +272,19 @@ function renderTiles() {
     const btn = e.target.closest("[data-final]");
     if (!btn) return;
     state.selectedFinal = btn.dataset.final;
-    document.querySelectorAll("[data-final]").forEach((b) => b.classList.toggle("selected", b === btn));
+    document.querySelectorAll("[data-final]").forEach((b) => {
+      b.classList.remove("correct-reveal");
+      b.classList.toggle("selected", b === btn);
+    });
     els.chosenFinal.textContent = state.selectedFinal;
+    // 立即判断韵母是否正确，显示对勾
+    const q = currentQuestion();
+    if (state.selectedFinal === q.final) {
+      document.querySelector(`[data-final="${q.final}"]`)?.classList.add("correct-reveal");
+      $("finalCheck").textContent = "✅";
+    } else {
+      $("finalCheck").textContent = "";
+    }
     playFinal(state.selectedFinal);
     if (state.designMode) {
       updateTone();
@@ -273,9 +299,13 @@ function tileButton(value, attr, extraClass = "") {
   return `<button class="tile ${extraClass}" ${attr}="${value}">${value}</button>`;
 }
 
+function setToneButton(tone) {
+  document.querySelectorAll(".tone-btn").forEach((b) => {
+    b.classList.toggle("active", Number(b.dataset.tone) === tone);
+  });
+}
+
 function updateTone() {
-  state.selectedTone = Number(els.toneSlider.value);
-  els.tonePreview.textContent = toneNames[state.selectedTone];
   if (state.selectedInitial && state.selectedFinal) {
     els.pinyin.textContent = markedPinyin(state.selectedInitial, state.selectedFinal, state.selectedTone);
   } else {
@@ -290,6 +320,23 @@ function checkAnswer() {
   const q = currentQuestion();
   const sameSound = state.selectedInitial === q.initial && state.selectedFinal === q.final;
   const exact = sameSound && state.selectedTone === q.tone;
+
+  // 对勾标志：声母/韵母选对时在按钮上显示 ✓
+  const initCorrect = state.selectedInitial === q.initial;
+  const finalCorrect = state.selectedFinal === q.final;
+  document.querySelectorAll("[data-initial]").forEach((b) => {
+    b.classList.remove("correct-reveal");
+    if (initCorrect && b.dataset.initial === q.initial) b.classList.add("correct-reveal");
+  });
+  document.querySelectorAll("[data-final]").forEach((b) => {
+    b.classList.remove("correct-reveal");
+    if (finalCorrect && b.dataset.final === q.final) b.classList.add("correct-reveal");
+  });
+
+  // 中间区域标识位：每个 piece 上方独立显示 ✅
+  $("initCheck").textContent = initCorrect ? "✅" : "";
+  $("finalCheck").textContent = finalCorrect ? "✅" : "";
+
   if (exact) {
     finishQuestion("correct", `答对啦！${q.char}，${markedPinyin(q.initial, q.final, q.tone)} ✨`);
   } else if (sameSound) {
@@ -354,6 +401,8 @@ function startGroup(group = state.group) {
   state.wrong = [];
   state.streak = 0;
   $("summaryPanel").hidden = true;
+  els.groupSlider.value = String(state.group);
+  els.groupText.textContent = state.reviewMode ? "再次练习" : `组 ${state.group}`;
   resetSelection();
   updateStats();
   setTimeout(speakCurrent, 350);
@@ -387,7 +436,7 @@ function showAnswer() {
   state.selectedInitial = q.initial;
   state.selectedFinal = q.final;
   state.selectedTone = q.tone;
-  els.toneSlider.value = String(q.tone);
+  setToneButton(q.tone);
   els.chosenInitial.textContent = q.initial;
   els.chosenFinal.textContent = q.final;
   els.pinyin.textContent = markedPinyin(q.initial, q.final, q.tone);
@@ -457,8 +506,12 @@ function addCustomCard(card) {
 
 renderTiles();
 renderDesigner();
-els.toneSlider.addEventListener("input", () => { updateTone(); });
-els.toneSlider.addEventListener("change", () => {
+// 声调按键点击
+els.toneBtns.addEventListener("click", (e) => {
+  const btn = e.target.closest(".tone-btn");
+  if (!btn) return;
+  state.selectedTone = Number(btn.dataset.tone);
+  setToneButton(state.selectedTone);
   updateTone();
   if (state.designMode) {
     renderCandidates();
@@ -484,6 +537,14 @@ els.groupSlider.addEventListener("input", () => {
   els.groupText.textContent = `组 ${state.group}`;
 });
 $("finishBtn").addEventListener("click", finishPractice);
+// 下一组按钮
+els.nextGroupBtn.addEventListener("click", () => {
+  const next = state.reviewMode ? 1 : state.group + 1;
+  const maxGroup = Number(els.groupSlider.max);
+  const target = next > maxGroup ? 1 : next;
+  els.groupSlider.value = String(target);
+  startGroup(target);
+});
 $("toggleDesignerBtn").addEventListener("click", () => {
   state.designMode = !state.designMode;
   resetSelection();
